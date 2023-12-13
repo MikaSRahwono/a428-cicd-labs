@@ -1,20 +1,24 @@
-node {
-    docker.image('node:16-buster-slim').withRun('-p 3000:3000') {
-        
-        // Tahap Build
-        stage('Build') {
-            tool 'nodejs'
-            sh 'npm install'
+pipeline {
+    agent {
+        docker {
+            image 'node:16-buster-slim' 
+            args '-p 3000:3000' 
         }
-        
-        // Tahap Test
+    }
+    stages {
+        stage('Build') { 
+            steps {
+                sh 'npm install'
+            }
+        }
         stage('Test') {
-            sh './jenkins/scripts/test.sh'
+            steps {
+                sh './jenkins/scripts/test.sh'
+            }
         }
-
-        // Tahap Deploy
         stage('Deploy') {
             steps {
+                input message: 'Lanjutkan ke tahap Deploy? (Klik "Proceed" untuk meneruskan)'
                 sh './jenkins/scripts/deliver.sh'
                 sleep(60)
                 sh './jenkins/scripts/kill.sh'
